@@ -22,6 +22,10 @@ var userAddedRatings = [] // used to demonstrate POST functionality
 var unavailable = false
 var healthy = true
 
+function withCluster (payload) {
+  return Object.assign({}, payload, { Cluster: process.env.CLUSTER || '' })
+}
+
 if (process.env.SERVICE_VERSION === 'v-unavailable') {
     // make the service unavailable once in 60 seconds
     setInterval(function () {
@@ -124,13 +128,13 @@ dispatcher.onGet(/^\/ratings\/[0-9]*/, function (req, res) {
                   if (results[1]) {
                       secondRating = results[1].Rating
                   }
-                  var result = {
+                  var result = withCluster({
                       id: productId,
                       ratings: {
                           Reviewer1: firstRating,
                           Reviewer2: secondRating
                       }
-                  }
+                  })
                   res.writeHead(200, {'Content-type': 'application/json'})
                   res.end(JSON.stringify(result))
               }
@@ -158,13 +162,13 @@ dispatcher.onGet(/^\/ratings\/[0-9]*/, function (req, res) {
               if (data[1]) {
                 secondRating = data[1].rating
               }
-              var result = {
+              var result = withCluster({
                 id: productId,
                 ratings: {
                   Reviewer1: firstRating,
                   Reviewer2: secondRating
                 }
-              }
+              })
               res.writeHead(200, {'Content-type': 'application/json'})
               res.end(JSON.stringify(result))
             }
@@ -238,15 +242,15 @@ function getLocalReviewsServiceUnavailable(res) {
 
 function getLocalReviews (productId) {
   if (typeof userAddedRatings[productId] !== 'undefined') {
-      return userAddedRatings[productId]
+      return withCluster(userAddedRatings[productId])
   }
-  return {
+  return withCluster({
     id: productId,
     ratings: {
       'Reviewer1': 5,
       'Reviewer2': 4
     }
-  }
+  })
 }
 
 function handleRequest (request, response) {

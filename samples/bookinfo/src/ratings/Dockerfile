@@ -23,6 +23,9 @@ RUN apt-get update \
 ARG service_version
 ENV SERVICE_VERSION=${service_version:-v1}
 
+# Optional: value for the "Cluster" field in JSON responses (override in Kubernetes/env).
+ENV CLUSTER=
+
 COPY package.json /opt/microservices/
 COPY ratings.js /opt/microservices/
 WORKDIR /opt/microservices
